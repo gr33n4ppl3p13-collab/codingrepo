@@ -11,7 +11,7 @@ stevey = 100
 keys = [False,False,False,False]
 while stevey <= 600:
     studio.blit(bg, (0,0))
-    studio.blit(steve, (100,100))
+    studio.blit(steve, (stevex,stevey))
     pygame.display.flip()
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -36,14 +36,14 @@ while stevey <= 600:
             elif event.key==K_RIGHT:
                 keys[3]=False
     if keys[0]:
-        if stevey >= 0:
+        if stevey > 0:
             stevey -= 10
     if keys[1]:
-        if stevey <= 600:
+        if stevey < 500:
             stevey += 10
     if keys[2]:
-        if stevex >= 0:
+        if stevex > 0:
             stevex -= 10
     if keys[3]:
-        if stevex <= 600:
+        if stevex < 500:
             stevex += 10
