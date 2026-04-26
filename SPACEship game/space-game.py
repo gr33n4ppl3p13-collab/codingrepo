@@ -11,7 +11,7 @@ Yellow="yellow"
 black="black"
 BORDER=pygame.Rect(WIDTH//2-5,0,10,HEIGHT)
 shoot=pygame.mixer.Sound("SPACEship game\gun-silencer.mp3")
-shoot2=pygame.mixer.Sound("SPACEship game\grenade.mp3")
+hit=pygame.mixer.Sound("SPACEship game\grenade.mp3")
 font=pygame.font.SysFont("comic sans",20)
 fps=60
 velocity=5
@@ -48,6 +48,37 @@ def yellowmove(keyspressed,yellow):
         yellow.y -= velocity
     if keyspressed[pygame.K_s]and yellow.y+velocity+yellow.height<HEIGHT-15:
         yellow.y += velocity
+def redmove(keyspressed,red):
+    if keyspressed[pygame.K_LEFT]and red.x-velocity>BORDER.x +BORDER.width:
+        red.x -= velocity
+    if keyspressed[pygame.K_RIGHT]and red.x+velocity+red.width<WIDTH:
+        red.x += velocity
+    if keyspressed[pygame.K_UP]and red.y-velocity>0:
+        red.y -= velocity
+    if keyspressed[pygame.K_DOWN]and red.y+velocity+red.height<HEIGHT-15:
+        red.y += velocity
+def shootf(yellowbullets,redbullets,yellow,red):
+    for i in yellowbullets:
+        i.x += velocity
+        if red.colliderect(i):
+            pygame.event.post(pygame.event.Event(redhit))
+            yellowbullets.remove(i)
+            hit.play()
+        elif i.x >WIDTH:
+            yellowbullets.remove(i)
+    for i in redbullets:
+        i.x -= velocity
+        if yellow.colliderect(i):
+            pygame.event.post(pygame.event.Event(yellowhit))
+            redbullets.remove(i)
+            hit.play()
+        elif i.x <0:
+            redbullets.remove(i)
+def win(tea):
+    text=font.render(tea,1,"lime")
+    SCREEN.blit(text,(WIDTH/2-text.get_width()/2,HEIGHT/2-text.get_height()/2))
+    pygame.display.update()
+    pygame.time.delay(5000)
 red=pygame.Rect(700,300,ssw,ssh)
 yellow=pygame.Rect(100,300,ssw,ssh)
 redbullets=[]
@@ -63,6 +94,30 @@ while run:
         if i.type==pygame.QUIT:
             run=False
             pygame.quit()
+        if i.type==pygame.KEYDOWN:
+            if i.key == pygame.K_e and len(yellowbullets)<maxbullets:
+                bullet=pygame.Rect(yellow.x+yellow.width,yellow.y+yellow.height//2-2,10,5)
+                yellowbullets.append(bullet)
+                shoot.play()
+            if i.key == pygame.K_RCTRL and len(redbullets)<maxbullets:
+                bullet=pygame.Rect(red.x,red.y+red.height//2-2,10,5)
+                redbullets.append(bullet)
+                shoot.play()
+        if i.type==redhit:
+            redhealth-=1
+        if i.type==yellowhit:
+            yellowhealth-=1
+    wintext=""
+    if redhealth<=0:
+        wintext="Yellow won! 1 Exp Gained."
+    if yellowhealth<=0:
+        wintext="Red won! 3 Exp Gained."
+    if wintext!="":
+        win(wintext)
+        break
+
     draw(red,yellow,redbullets,yellowbullets,redhealth,yellowhealth)
     keyspressed=pygame.key.get_pressed()
     yellowmove(keyspressed,yellow)
+    redmove(keyspressed,red)
+    shootf(yellowbullets,redbullets,yellow,red)
